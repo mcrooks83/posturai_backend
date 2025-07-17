@@ -1,0 +1,53 @@
+The output of the calculations should take into account that the image is fontal image
+i.e facing the camera.  For example, if the right should is deemed closer to the camera then
+the spine is rotated to the left. If the line between the hip mid point and the shoulder mid point
+is left then the spine is actually flexed right.  
+
+Knee flexion seems to move the landmark up the image
+
+HEAD:
+
+Frontal tilt -  inner eye angle
+Roation      -  inner eye left to nose, inner eye right to nose (horizonal) - shorter distance is closer to camera
+
+NECK:   
+
+Frontal Tile -  angle between the mid hip point to shoulders and should mid point to nose.  0 would be line is straight. 
+                clockwise the angle would be small on the right of the lines if the neck is flexed to the right and large if it
+                were flexed to the left
+
+Rotation     -  relatively opposite to the spine
+                perhaps use the nose and distance to another landmark on each side to determine roation
+
+SHOULDERS
+
+Frontal Tilt -  angle between left and right shoulder landmark
+                
+
+
+SPINE
+
+Lateral Flexion -   calcualtes the angle between the spine vector and the vertical reference vector
+
+Rotation        -   uses the distance of the shoulder landmark to the hip mid point.  shorter distance is closer to camera
+                    and thus rotated to the opposite side (i.e if right is shorter it is rotated to the left)
+
+PELVIS          
+
+Hike            -   uses angle between left and right hip landmark
+                    could use y coordinate
+
+Rotation        -   uses the hip positions (x axis) and the base midline to determine which is closer and thus
+                    more rotated
+
+KNEE            
+                -   internal / external rotation calcualted from ankle, knee, hip x positions 
+                    doesnt work out whether the knee is internally rotated or not but suggests one is more rotated than the other.
+                    there could be extrenal rotation
+                    perhaps the distance between hip and knee (x direction) can be used for aduction comparison
+                    
+
+
+
+
+
