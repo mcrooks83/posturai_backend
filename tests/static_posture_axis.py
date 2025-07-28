@@ -1,3 +1,5 @@
+"""Pose analysis based on rotating image to align feet horizontally."""
+
 import cv2
 import numpy as np
 import os
@@ -5,9 +7,6 @@ import posture_recongniser
 
 
 # --- Helper functions ---
-
-def left_to_right_vector(left_point, right_point):
-    return right_point[0] - left_point[0], right_point[1] - left_point[1]
 
 def angles_between_axis_and_line(line, axis):
     """A tuple of joint angles."""
@@ -38,6 +37,7 @@ def angles_between_axis_and_line(line, axis):
     return  left_angle, right_angle
 
 def describe_tilt(line, axis, label):
+    """Print the results."""
     a, b = angles_between_axis_and_line(line, axis)
     if abs(a - b) < 0.5:
         if label == "shoulders":
@@ -54,7 +54,6 @@ def describe_tilt(line, axis, label):
             return f"Your left shoulder is elevated"
         else:
             return f"Your {label} is elevated on the left side"
-
 
 def resize_image_for_display(image, max_width=1280, max_height=720):
     """Resize image to fit within display bounds."""
@@ -74,7 +73,7 @@ def resize_image_for_display(image, max_width=1280, max_height=720):
 
 
 def main():
-    # Replace this with the path to your image file
+    """Image loading and processing loop."""
     image_path = "../test_images/orange_relaxed.jpg"  # Example: "./images/person1.jpg"
 
     if not os.path.isfile(image_path):

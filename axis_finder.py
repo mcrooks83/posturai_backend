@@ -1,9 +1,12 @@
+"""Axis finder."""
+
 from vector_utils import find_vector_between, find_midpoint
 
 
 class AxisFinder:
 
     def __init__(self, image, lm):
+        """Get midpoints, vertical axes and base vector."""
         h, w, _ = image.shape
 
         # Midpoints

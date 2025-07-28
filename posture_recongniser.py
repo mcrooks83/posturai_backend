@@ -14,11 +14,13 @@ mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
 def _get_xy(landmark_id, landmarks, w, h):
+    """Helper to get a landmark position."""
     lm = landmarks[landmark_id]
     return int(lm.x * w), int(lm.y * h)
 
 
 class Landmark:
+    """Stores mediapipe landmarks and their positions."""
 
     def __init__(self, pose, w, h):
         self.pose_landmark = pose
@@ -50,12 +52,13 @@ class Landmark:
 class PostureRecogniser:
 
     def __init__(self, image):
-
+        """Process given image to get landmarks.
+        Then rotate image and process it again to analyse posture and visualise."""
         if image is None:
             print("Failed to load image.")
             return
 
-        # 1 - original image
+        # 1 - processing original image
         self.image = image
         self.processed_landmark = self.find_base_landmarks(self.image)
 
@@ -78,11 +81,12 @@ class PostureRecogniser:
         self.base_vector = None
         self.upright_vector = None
 
+        # analyse
         self.analyze_posture()
         self.annotated_image = self.annotate(self.processed_landmark.pose_landmark)
 
-
     def find_base_landmarks(self, image):
+        """Get base landmarks for image rotation."""
         with mp_pose.Pose(static_image_mode=True) as pose:
             image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             result = pose.process(image_rgb)
@@ -94,8 +98,8 @@ class PostureRecogniser:
                 return processed_landmark
         return None
 
-
     def analyze_posture(self):
+        """Print analysis results."""
         self.upright_vector = self.vector_handler.find_upright_vector()
 
         # vectors for body symmetry
@@ -126,6 +130,7 @@ class PostureRecogniser:
         print(describe_tilt("head", head_angle))
 
     def annotate(self, landmarks):
+        """Visualise the vectors."""
         annotated_image = self.image.copy()
 
         cv2.line(

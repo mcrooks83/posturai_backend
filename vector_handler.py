@@ -1,10 +1,12 @@
-import cv2
+"""Vector handler."""
+
 import numpy as np
 import imutils
 from vector_utils import perpendicular_vector
 
 
 class VectorHandler:
+    """Operations with vectors and image rotation."""
 
     def __init__(self, lm, af):
         self.af = af
@@ -12,6 +14,7 @@ class VectorHandler:
         self.upright_vector = None
 
     def find_upright_vector(self):
+        """Find a perpendicular from mid_base to the highest landmark (eyes)."""
         foot_perp = perpendicular_vector(self.af.base_vector)
 
         if foot_perp[1] == 0:
