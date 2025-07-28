@@ -68,7 +68,7 @@ def center_axis():
 
 def analyze_posture_and_annotate(image, landmarks):
     h, w, _ = image.shape
-    lm = landmarks.landmark
+    lm = landmarks.processed_landmark
 
     # Landmark IDs
     LEFT_SHOULDER, RIGHT_SHOULDER = 11, 12
@@ -215,7 +215,7 @@ def analyze_posture_and_annotate(image, landmarks):
     elif rotation_diff > 0:
         spine_status += " and is rotated toward the left (right shoulder forward)."
     else:
-        spine_status += " and is rotated toward the right (left shoulder forward)."
+        spine_status += " and is rotated toward the right (left shoulder forward)"
 
 
     # --- Annotate image ---
