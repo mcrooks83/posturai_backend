@@ -3,10 +3,6 @@
 import numpy as np
 
 
-def left_to_right_vector(left_point, right_point):
-    """Calculate vector coordinates."""
-    return right_point[0] - left_point[0], right_point[1] - left_point[1]
-
 def find_midpoint(p1, p2):
     return (p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2
 
@@ -18,7 +14,8 @@ def perpendicular_vector(vector):
     perp = np.array([-vector[1], vector[0]])
     if perp[1] > 0:
         perp = -perp
-    return perp
+        print("perp vector: " + str(perp))
+    return tuple(perp)
 
 def intersect_vectors(origin1, dir1, origin2, dir2):
     """Find intersection of two vectors."""
@@ -37,7 +34,7 @@ def intersect_vectors(origin1, dir1, origin2, dir2):
 
     return intersect_x, intersect_y
 
-def signed_angle_between(v1, v2):
+def find_angles_between(v1, v2):
     """Angle in degrees between two vectors."""
     v1 = np.array(v1, dtype=np.float32)
     v2 = np.array(v2, dtype=np.float32)
@@ -47,10 +44,39 @@ def signed_angle_between(v1, v2):
     )
 
     angle_deg = np.degrees(rad_angle)
+    other_angle = 180 - angle_deg
+    return angle_deg, other_angle
 
-    if angle_deg > 90:
-        angle_deg = 180 - angle_deg
-    elif angle_deg < -90:
-        angle_deg = -180 - angle_deg
+def four_angles_between(v1, v2):
+    v1 = np.array(v1, dtype=float)
+    v2 = np.array(v2, dtype=float)
+    v1 /= np.linalg.norm(v1)
+    v2 /= np.linalg.norm(v2)
 
-    return angle_deg
+    angles = []
+    angles.append(find_angles_between(v1, v2))
+    angles.append(find_angles_between(v2, -v1))
+    angles.append(find_angles_between(-v1, -v2))
+    angles.append(find_angles_between(-v2, v1))
+
+    return angles
+
+def describe_tilt(line, axis, label):
+    """Print the results."""
+    a, b = find_angles_between(line, axis)
+    if abs(a - b) < 0.5:
+        if label == "shoulders":
+            return f"Your {label}s are pretty balanced"
+        else:
+            return f"Your {label} is pretty balanced"
+    if b == max(a, b):
+        if label == "shoulders":
+            return f"Your right shoulder is elevated"
+        else:
+            return f"Your {label} is elevated on the right side"
+    else:
+        if label == "shoulders":
+            return f"Your left shoulder is elevated"
+        else:
+            return f"Your {label} is elevated on the left side"
+

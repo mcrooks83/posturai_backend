@@ -4,8 +4,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-from tests.static_posture_2 import describe_tilt
-from vector_utils import left_to_right_vector, signed_angle_between
+from vector_utils import find_vector_between, find_angles_between, four_angles_between, describe_tilt
 import vector_handler
 import axis_finder
 
@@ -103,10 +102,10 @@ class PostureRecogniser:
         self.upright_vector = self.vector_handler.find_upright_vector()
 
         # vectors for body symmetry
-        self.shoulder_vector = left_to_right_vector(self.processed_landmark.ls, self.processed_landmark.rs)
-        self.pelvis_vector = left_to_right_vector(self.processed_landmark.lh, self.processed_landmark.rh)
-        self.head_vector = left_to_right_vector(self.processed_landmark.leye, self.processed_landmark.reye)
-        self.base_vector = left_to_right_vector(self.axis_finder.left_foot, self.axis_finder.right_foot)
+        self.shoulder_vector = find_vector_between(self.processed_landmark.ls, self.processed_landmark.rs)
+        self.pelvis_vector = find_vector_between(self.processed_landmark.lh, self.processed_landmark.rh)
+        self.head_vector = find_vector_between(self.processed_landmark.leye, self.processed_landmark.reye)
+        self.base_vector = find_vector_between(self.axis_finder.left_foot, self.axis_finder.right_foot)
 
         # ------ Intersections --------
         """
@@ -117,17 +116,16 @@ class PostureRecogniser:
         """
         # -----------------------------
 
-        print(signed_angle_between(self.upright_vector, self.head_vector))
-        print(signed_angle_between(self.upright_vector, self.shoulder_vector))
-        print(signed_angle_between(self.upright_vector, self.pelvis_vector))
+        print(find_angles_between(self.upright_vector, self.head_vector))
+        print(find_angles_between(self.upright_vector, self.shoulder_vector))
+        print(find_angles_between(self.upright_vector, self.pelvis_vector))
 
-        shoulder_angle = signed_angle_between(self.upright_vector, self.shoulder_vector)
-        pelvis_angle = signed_angle_between(self.upright_vector, self.pelvis_vector)
-        head_angle = signed_angle_between(self.upright_vector, self.head_vector)
+        print(describe_tilt(self.shoulder_vector, self.upright_vector, "shoulders"))
+        print(describe_tilt(self.pelvis_vector, self.upright_vector, "pelvis"))
+        print(describe_tilt(self.head_vector, self.upright_vector, "head"))
 
-        print(describe_tilt("shoulders", shoulder_angle))
-        print(describe_tilt("pelvis", pelvis_angle))
-        print(describe_tilt("head", head_angle))
+        #print(four_angles_between(self.upright_vector, self.shoulder_vector))
+#        print(sum(four_angles_between(self.upright_vector, self.shoulder_vector)))
 
     def annotate(self, landmarks):
         """Visualise the vectors."""
@@ -160,9 +158,14 @@ class PostureRecogniser:
 
         cv2.line(annotated_image, self.processed_landmark.leye, self.processed_landmark.reye, (0, 200, 50), 5, cv2.LINE_AA)
 
+        start = np.array(self.axis_finder.mid_base)
+        direction = np.array(self.upright_vector)
+        end = start + direction
+
         cv2.line(
             annotated_image,
-            (int(self.axis_finder.mid_base[0]), int(self.axis_finder.mid_base[1])), (int(self.upright_vector[0]), int(self.upright_vector[1])),
+            tuple(start.astype(int)),
+            tuple(end.astype(int)),
             (255, 0, 255), 8, cv2.LINE_AA
         )
 
