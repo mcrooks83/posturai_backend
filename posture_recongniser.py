@@ -116,13 +116,15 @@ class PostureRecogniser:
         """
         # -----------------------------
 
-        print(find_angles_between(self.upright_vector, self.head_vector))
-        print(find_angles_between(self.upright_vector, self.shoulder_vector))
-        print(find_angles_between(self.upright_vector, self.pelvis_vector))
+        print(find_angles_between(self.head_vector, self.upright_vector))
+        print(find_angles_between(self.shoulder_vector, self.upright_vector))
+        print(find_angles_between(self.pelvis_vector, self.upright_vector))
 
-        print(describe_tilt(self.shoulder_vector, self.upright_vector, "shoulders"))
-        print(describe_tilt(self.pelvis_vector, self.upright_vector, "pelvis"))
-        print(describe_tilt(self.head_vector, self.upright_vector, "head"))
+        print(describe_tilt(self.upright_vector, self.head_vector, "head"))
+        print(describe_tilt(self.upright_vector, self.shoulder_vector, "shoulders"))
+        print(describe_tilt(self.upright_vector, self.pelvis_vector, "pelvis"))
+
+        print(find_angles_between(self.base_vector, self.upright_vector))
 
         #print(four_angles_between(self.upright_vector, self.shoulder_vector))
 #        print(sum(four_angles_between(self.upright_vector, self.shoulder_vector)))

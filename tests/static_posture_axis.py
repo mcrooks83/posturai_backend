@@ -27,7 +27,7 @@ def resize_image_for_display(image, max_width=1280, max_height=720):
 
 def main():
     """Image loading and processing loop."""
-    image_path = "../test_images/bad_posture.jpg"  # Example: "./images/person1.jpg"
+    image_path = "../test_images/andrea_front.jpg"
 
     if not os.path.isfile(image_path):
         print(f"Error: File not found: {image_path}")

@@ -44,6 +44,8 @@ class VectorHandler:
         elif rotation_angle < -90:
             angle = -180 - rotation_angle
 
-        print(f"Rotating image by {angle} degrees")
-        rotated = imutils.rotate_bound(image, angle)
-        return rotated
+        if angle >= abs(1):
+            print(f"Rotating image by {angle} degrees")
+            rotated = imutils.rotate_bound(image, angle)
+            return rotated
+        return image
