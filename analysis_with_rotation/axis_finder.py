@@ -1,6 +1,6 @@
 """Axis finder."""
 
-from vector_utils import find_vector_between, find_midpoint
+from analysis_with_rotation.vector_utils import find_vector_between, find_midpoint
 
 
 class AxisFinder:

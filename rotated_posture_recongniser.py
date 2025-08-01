@@ -4,10 +4,9 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-from vector_utils import find_vector_between, find_angles_between, four_angles_between, describe_tilt
-import vector_handler
-import axis_finder
-
+from abstract_posture_recogniser import AbstractPostureRecogniser
+from analysis_with_rotation.vector_utils import find_vector_between, find_angles_between, describe_tilt
+from analysis_with_rotation import vector_handler, axis_finder
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
@@ -48,7 +47,7 @@ class Landmark:
         self.rtoe = _get_xy(RIGHT_TOE, lm, w, h)
 
 
-class PostureRecogniser:
+class PostureRecogniser(AbstractPostureRecogniser):
 
     def __init__(self, image):
         """Process given image to get landmarks.
@@ -59,7 +58,7 @@ class PostureRecogniser:
 
         # 1 - processing original image
         self.image = image
-        self.processed_landmark = self.find_base_landmarks(self.image)
+        self.processed_landmark = self._find_base_landmarks(self.image)
 
         self.axis_finder = axis_finder.AxisFinder(self.image, self.processed_landmark)
         self.vector_handler = vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
@@ -68,7 +67,7 @@ class PostureRecogniser:
 
         # 2 - processing rotated image
         self.image = rotated
-        self.processed_landmark = self.find_base_landmarks(self.image)
+        self.processed_landmark = self._find_base_landmarks(self.image)
 
         self.axis_finder = axis_finder.AxisFinder(self.image, self.processed_landmark)
         self.vector_handler = vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
@@ -84,7 +83,7 @@ class PostureRecogniser:
         self.analyze_posture()
         self.annotated_image = self.annotate(self.processed_landmark.pose_landmark)
 
-    def find_base_landmarks(self, image):
+    def _find_base_landmarks(self, image):
         """Get base landmarks for image rotation."""
         with mp_pose.Pose(static_image_mode=True) as pose:
             image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

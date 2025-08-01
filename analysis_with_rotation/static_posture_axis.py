@@ -3,7 +3,7 @@
 import cv2
 import numpy as np
 import os
-import posture_recongniser
+import rotated_posture_recongniser
 
 
 # --- Helper function ---
