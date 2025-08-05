@@ -1,35 +1,54 @@
 """Controller class."""
+import cv2
+import mediapipe as mp
 
-from abstract_posture_recogniser import AbstractPostureRecogniser
+from helper import landmark
+from helper.axis_finder import AxisFinder
+from helper.landmark import Landmark
 from rotated_posture_recongniser import PostureRecogniser
-from fascia_lines.front_functional_line import FrontFunctionalLine
-from fascia_lines.back_functional_line import BackFunctionalLine
-from fascia_lines.spiral_line import SpiralLine
+from strategies.central_axis import CentralAxis
+from strategies.front_functional_line import FrontFunctionalLine
+from strategies.spiral_line import SpiralLine
 
+
+mp_pose = mp.solutions.pose
 
 class PostureController:
     def __init__(self):
-        self.strategies = {
-            #'default': -----
-            'rotation': PostureRecogniser,
-            'front_fascia': FrontFunctionalLine,
-            'back_fascia': BackFunctionalLine,
-            'spiral_fascia': SpiralLine
-        }
+        self.image = None
+        self.landmarks = None
+        self.axis_finder = None
+        self.strategies = {}
         self.current_strategy = None
 
-    def set_strategy(self, strategy_name, *args, **kwargs):
-        if strategy_name in self.strategies:
-            self.current_strategy = self.strategies[strategy_name](*args, **kwargs)
-        else:
-            raise ValueError(f"No such strategy: {strategy_name}")
+    def process_image(self, image):
+        """Call this once with the image to set everything up."""
+        with mp_pose.Pose(static_image_mode=True) as pose:
+            results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            if not results.pose_landmarks:
+                raise ValueError("No landmarks detected.")
 
-    def analyze(self):
-        if not self.current_strategy:
-            raise RuntimeError("No strategy set")
-        return self.current_strategy.analyze_posture()
+            h, w = image.shape[:2]
+            self.landmarks = Landmark(results.pose_landmarks, w, h)
 
-    def annotate(self, landmarks):
-        if not self.current_strategy:
-            raise RuntimeError("No strategy set")
-        return self.current_strategy.annotate(landmarks)
+        self.axis_finder = AxisFinder(image, self.landmarks)
+
+        self.strategies = {
+            "spiral_line": SpiralLine(self.landmarks, self.axis_finder),
+            "front_line": FrontFunctionalLine(self.landmarks, self.axis_finder),
+            "central_axis": CentralAxis(self.landmarks, self.axis_finder),
+        }
+
+        for strategy in self.strategies.values():
+            strategy.analyze_posture()
+
+    def set_strategy(self, name):
+        if name not in self.strategies:
+            raise ValueError(f"Unknown strategy '{name}'")
+        self.current_strategy = name
+
+    def annotate(self):
+        if self.current_strategy is None:
+            raise RuntimeError("No strategy selected for annotation.")
+        return self.strategies[self.current_strategy].annotate()
+

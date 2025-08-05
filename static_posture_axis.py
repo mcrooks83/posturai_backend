@@ -1,9 +1,13 @@
 """Pose analysis based on rotating image to align feet horizontally."""
 
 import cv2
-import numpy as np
 import os
+
+from PIL.ImageShow import show
+
 import rotated_posture_recongniser
+from posture_controller import PostureController
+from strategies import central_axis
 
 
 # --- Helper function ---
@@ -26,8 +30,8 @@ def resize_image_for_display(image, max_width=1280, max_height=720):
 
 
 def main():
-    """Image loading and processing loop."""
-    image_path = "../test_images/andrea_front.jpg"
+    """Image loading and processing loop.
+    image_path = "test_images/andrea_front.jpg"
 
     if not os.path.isfile(image_path):
         print(f"Error: File not found: {image_path}")
@@ -39,12 +43,26 @@ def main():
         print("Failed to load image.")
         return
 
-    recogniser = posture_recongniser.PostureRecogniser(image)
-    resized_image = resize_image_for_display(recogniser.annotated_image)
+    controller = PostureController()
+    processed_image = controller.process_image(image, strategy_name='central_axis')
+
+    # recogniser = abstract_posture_recogniser.AbstractPostureRecogniser(image)
+    # resized_image = resize_image_for_display(recogniser.annotated_image)
 
     cv2.imshow("Posture Analysis", resized_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    """
+    controller = PostureController()
+    image = cv2.imread("test_images/andrea_front.jpg")
+    controller.process_image(image)
+
+    controller.set_strategy("spiral_line")
+    annotated_image = controller.annotate()
+
+    cv2.imshow("Spiral Result", annotated_image)
+    cv2.waitKey(0)
+
 
 if __name__ == "__main__":
     main()

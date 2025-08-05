@@ -47,6 +47,11 @@ def find_angles_between(v1, v2):
     other_angle = 180 - angle_deg
     return angle_deg, other_angle
 
+def get_angle_by_points(p1, p2):
+    dx = p2[0] - p1[0]
+    dy = p2[1] - p1[1]
+    return np.degrees(np.arctan2(dy, dx))
+
 def four_angles_between(v1, v2):
     v1 = np.array(v1, dtype=float)
     v2 = np.array(v2, dtype=float)
@@ -61,10 +66,10 @@ def four_angles_between(v1, v2):
 
     return angles
 
-def describe_tilt(line, axis, label):
+def describe_tilt_two_vectors(line, axis, label):
     """Print the results."""
     a, b = find_angles_between(line, axis)
-    if abs(a - b) < 0.5:
+    if abs(a - b) < 1:
         if label == "shoulders":
             return f"Your {label}s are pretty balanced"
         else:
@@ -80,3 +85,53 @@ def describe_tilt(line, axis, label):
         else:
             return f"Your {label} is elevated on the left side"
 
+def describe_tilt_with_angle(label, angle):
+    abs_angle = abs(angle)
+    description = ""
+    if abs_angle < 2:
+        if label == "shoulders":
+            description = f"Your {label} are pretty balanced"
+        else:
+            description = f"Your {label} is pretty balanced"
+        return description
+    elif abs_angle < 5:
+        side = "left" if angle > 0 else "right"
+        if label == "shoulders":
+            f"Your {label} are dropped on the {side}"
+        else:
+            f"Your {label} is dropped on the {side}"
+        return description
+    else:
+        side = "left" if angle > 0 else "right"
+        if label == "shoulders":
+            description = f"Your {label} are elevated on the {side}"
+        else:
+            description = f"Your {label} is elevated on the {side}"
+        return description
+
+def find_vector_length(vector):
+    return np.linalg.norm(vector)
+
+def describe_front_functional_line_meaning(left, right):
+    if abs(left - right) <= 1:
+        return "Your core and thigh engagement appears symmetrical across both sides."
+    elif left > right:
+        return "The left front functional line is longer, which may suggest more tension on your left side."
+    else:
+        return "The right front functional line is longer, which may suggest more tension on your right side."
+
+def describe_spiral_line_meaning(left, right):
+    if abs(left - right) <= 1:
+        return "No significant rotational pattern detected in your posture."
+    elif left > right:
+        return "Your left spiral line is longer, which may suggest a postural shift toward the right."
+    else:
+        return "Your right spiral line is longer, which may suggest a postural shift toward the left."
+
+def knee_deviation(hip, knee, ankle):
+    hip_x, _ = hip
+    knee_x, _ = knee
+    ankle_x, _ = ankle
+    mid_x = (hip_x + ankle_x) / 2
+    deviation = knee_x - mid_x
+    return deviation

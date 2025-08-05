@@ -1,9 +1,8 @@
 import unittest
 
-from analysis_with_rotation.vector_utils import find_angles_between
+from helper.vector_utils import find_angles_between
 import os
 import cv2
-import rotated_posture_recongniser
 
 
 class TestAngles(unittest.TestCase):

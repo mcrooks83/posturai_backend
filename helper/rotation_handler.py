@@ -2,10 +2,10 @@
 
 import numpy as np
 import imutils
-from vector_utils import perpendicular_vector
+from helper.vector_utils import perpendicular_vector
 
 
-class VectorHandler:
+class RotationHandler:
     """Operations with vectors and image rotation."""
 
     def __init__(self, lm, af):

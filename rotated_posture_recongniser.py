@@ -5,46 +5,11 @@ import mediapipe as mp
 import numpy as np
 
 from abstract_posture_recogniser import AbstractPostureRecogniser
-from analysis_with_rotation.vector_utils import find_vector_between, find_angles_between, describe_tilt
-from analysis_with_rotation import vector_handler, axis_finder
+from helper.vector_utils import find_vector_between, find_angles_between, describe_tilt_two_vectors
+from helper import axis_finder, rotation_handler
 
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
-
-def _get_xy(landmark_id, landmarks, w, h):
-    """Helper to get a landmark position."""
-    lm = landmarks[landmark_id]
-    return int(lm.x * w), int(lm.y * h)
-
-
-class Landmark:
-    """Stores mediapipe landmarks and their positions."""
-
-    def __init__(self, pose, w, h):
-        self.pose_landmark = pose
-        lm = self.pose_landmark.landmark
-
-        LEFT_SHOULDER, RIGHT_SHOULDER = 11, 12
-        LEFT_HIP, RIGHT_HIP = 23, 24
-        LEFT_KNEE, RIGHT_KNEE = 25, 26
-        LEFT_ANKLE, RIGHT_ANKLE = 27, 28
-        LEFT_EYE_INNER, RIGHT_EYE_INNER = 1, 4
-        NOSE = 0
-        LEFT_TOE, RIGHT_TOE = 31, 32
-
-        self.ls = _get_xy(LEFT_SHOULDER, lm, w, h)
-        self.rs = _get_xy(RIGHT_SHOULDER, lm, w, h)
-        self.lh = _get_xy(LEFT_HIP, lm, w, h)
-        self.rh = _get_xy(RIGHT_HIP, lm, w, h)
-        self.lk = _get_xy(LEFT_KNEE, lm, w, h)
-        self.rk = _get_xy(RIGHT_KNEE, lm, w, h)
-        self.la = _get_xy(LEFT_ANKLE, lm, w, h)
-        self.ra = _get_xy(RIGHT_ANKLE, lm, w, h)
-        self.leye = _get_xy(LEFT_EYE_INNER, lm, w, h)
-        self.reye = _get_xy(RIGHT_EYE_INNER, lm, w, h)
-        self.nose = _get_xy(NOSE, lm, w, h)
-        self.ltoe = _get_xy(LEFT_TOE, lm, w, h)
-        self.rtoe = _get_xy(RIGHT_TOE, lm, w, h)
 
 
 class PostureRecogniser(AbstractPostureRecogniser):
@@ -52,13 +17,7 @@ class PostureRecogniser(AbstractPostureRecogniser):
     def __init__(self, image):
         """Process given image to get landmarks.
         Then rotate image and process it again to analyse posture and visualise."""
-        if image is None:
-            print("Failed to load image.")
-            return
-
-        # 1 - processing original image
-        self.image = image
-        self.processed_landmark = self._find_base_landmarks(self.image)
+        super().__init__(image)
 
         self.axis_finder = axis_finder.AxisFinder(self.image, self.processed_landmark)
         self.vector_handler = vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
@@ -67,34 +26,14 @@ class PostureRecogniser(AbstractPostureRecogniser):
 
         # 2 - processing rotated image
         self.image = rotated
-        self.processed_landmark = self._find_base_landmarks(self.image)
+        self.processed_landmark = AbstractPostureRecogniser.find_base_landmarks(self.image)
 
         self.axis_finder = axis_finder.AxisFinder(self.image, self.processed_landmark)
         self.vector_handler = vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
 
-        # initialise
-        self.shoulder_vector = None
-        self.pelvis_vector = None
-        self.head_vector = None
-        self.base_vector = None
-        self.upright_vector = None
-
         # analyse
         self.analyze_posture()
         self.annotated_image = self.annotate(self.processed_landmark.pose_landmark)
-
-    def _find_base_landmarks(self, image):
-        """Get base landmarks for image rotation."""
-        with mp_pose.Pose(static_image_mode=True) as pose:
-            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            result = pose.process(image_rgb)
-
-            if result.pose_landmarks:
-                h, w, _ = self.image.shape
-                processed_landmark = Landmark(result.pose_landmarks, w, h)
-
-                return processed_landmark
-        return None
 
     def analyze_posture(self):
         """Print analysis results."""
@@ -119,9 +58,9 @@ class PostureRecogniser(AbstractPostureRecogniser):
         print(find_angles_between(self.shoulder_vector, self.upright_vector))
         print(find_angles_between(self.pelvis_vector, self.upright_vector))
 
-        print(describe_tilt(self.upright_vector, self.head_vector, "head"))
-        print(describe_tilt(self.upright_vector, self.shoulder_vector, "shoulders"))
-        print(describe_tilt(self.upright_vector, self.pelvis_vector, "pelvis"))
+        print(describe_tilt_two_vectors(self.upright_vector, self.head_vector, "head"))
+        print(describe_tilt_two_vectors(self.upright_vector, self.shoulder_vector, "shoulders"))
+        print(describe_tilt_two_vectors(self.upright_vector, self.pelvis_vector, "pelvis"))
 
         print(find_angles_between(self.base_vector, self.upright_vector))
 
