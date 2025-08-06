@@ -20,16 +20,16 @@ class PostureRecogniser(AbstractPostureRecogniser):
         super().__init__(image)
 
         self.axis_finder = axis_finder.AxisFinder(self.image, self.processed_landmark)
-        self.vector_handler = vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
+        self.vector_handler = self.vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
 
         rotated = self.vector_handler.rotate_picture(self.image)
 
         # 2 - processing rotated image
         self.image = rotated
-        self.processed_landmark = AbstractPostureRecogniser.find_base_landmarks(self.image)
+        self.processed_landmark = None
 
         self.axis_finder = axis_finder.AxisFinder(self.image, self.processed_landmark)
-        self.vector_handler = vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
+        self.vector_handler = self.vector_handler.VectorHandler(self.processed_landmark, self.axis_finder)
 
         # analyse
         self.analyze_posture()

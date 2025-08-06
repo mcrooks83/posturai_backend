@@ -2,23 +2,26 @@
 
 from helper import vector_utils, image_annotation
 from abstract_posture_recogniser import AbstractPostureRecogniser
+from helper.axis_finder import AxisFinder
 from helper.landmark import Landmark
 
 
 class CentralAxis(AbstractPostureRecogniser):
 
-    def __init__(self, image, axis_finder=None):
+    def __init__(self, image, axis_finder: AxisFinder, landmark: Landmark):
         super().__init__(image)
         self.image = image
+        self.axis_finder = axis_finder
+        self.landmark = landmark
         self.analysis_result = self.analyze_posture()
-        self.annotated_image = self.annotate(image)
+        self.annotated_image = self.annotate()
 
     def analyze_posture(self):
         spine_status = ""
         knee_rotation_report = ""
         # HEAD
         # average all points on the left face and right face
-        left_face, right_face = Landmark.get_face_side_centers()
+        left_face, right_face = self.landmark.get_face_side_centers()
 
         head_angle = vector_utils.get_angle_by_points(left_face, right_face)
         head_description = vector_utils.describe_tilt_with_angle("head", head_angle)
@@ -79,18 +82,18 @@ class CentralAxis(AbstractPostureRecogniser):
         # spine direction relative to the base_mid
         vec_center_axis = (0, 1)  # Downward vertical in image coordinates, does assume that the image is straight
         spine_flex_angle = vector_utils.find_angles_between(vec_center_axis, vec_spine)
-        # print(f"spine flex angle {spine_flex_angle}", flush=True)
+        print(f"spine flex angle {spine_flex_angle}", flush=True)
 
         # Spinal lateral flexion
-        if abs(spine_flex_angle) < 1:
+        if abs(spine_flex_angle[0]) < 1:
             spine_status = "Your spine appears vertically aligned"
-        elif 1 < spine_flex_angle < 5:
+        elif 1 < spine_flex_angle[0] < 5:
             spine_status = "Your spine is slightly flexed to the left"
-        elif spine_flex_angle >= 5:
+        elif spine_flex_angle[0] >= 5:
             spine_status = "Your spine is flexed to the left"
-        elif -5 < spine_flex_angle < -1:
+        elif -5 < spine_flex_angle[0] < -1:
             spine_status = "Your spine is slightly flexed to the right"
-        elif spine_flex_angle <= -5:
+        elif spine_flex_angle[0] <= -5:
             spine_status = "Your spine is flexed to the right"
 
         # Spinal rotation
@@ -116,10 +119,13 @@ class CentralAxis(AbstractPostureRecogniser):
     """
         return report_text
 
-    def annotate(self, landmarks):
+    def annotate(self):
         annotated_image = self.image.copy()
 
-        image_annotation.draw_center_axis(self.image)
-        image_annotation.draw_pose_landmarks(self.image, landmarks)
+        image_annotation.draw_center_axis(self.image, self.axis_finder)
+        # image_annotation.draw_pose_landmarks(self.image, landmarks)
 
         return annotated_image
+
+    def get_result(self):
+        return self.analysis_result

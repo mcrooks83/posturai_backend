@@ -13,7 +13,7 @@ class AbstractPostureRecogniser(ABC):
 
         # 1 - processing original image
         self.image = image
-        self.processed_landmark = self.find_base_landmarks(self.image)
+        self.processed_landmark = None
         self.axis_finder = axis_finder
 
         self.vector_handler = None
@@ -26,15 +26,14 @@ class AbstractPostureRecogniser(ABC):
 
         self.annotated_image = None
 
-    def inject_dependencies(self, image, landmarks, axis_finder):
-        self.image = image
-        self.landmarks = landmarks
-        self.axis_finder = axis_finder
-
     @abstractmethod
     def analyze_posture(self):
         pass
 
     @abstractmethod
-    def annotate(self, landmarks):
+    def annotate(self):
+        pass
+
+    @abstractmethod
+    def get_result(self):
         pass

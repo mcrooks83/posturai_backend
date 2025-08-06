@@ -1,16 +1,21 @@
 """Measure spiral line."""
+import cv2
 
 from helper import vector_utils
 from abstract_posture_recogniser import AbstractPostureRecogniser
+from helper.axis_finder import AxisFinder
+from helper.landmark import Landmark
 
 
 class SpiralLine(AbstractPostureRecogniser):
 
-    def __init__(self, image, axis_finder=None):
+    def __init__(self, image, axis_finder: AxisFinder, landmark: Landmark):
         super().__init__(image)
         self.image = image
+        self.axis_finder = axis_finder
+        self.landmark = landmark
         self.analysis_result = self.analyze_posture()
-        self.annotated_image = self.annotate(image)
+        self.annotated_image = self.annotate()
 
     def analyze_posture(self):
         # left line
@@ -31,3 +36,25 @@ class SpiralLine(AbstractPostureRecogniser):
         print("right ear line:" + str(right_length))
 
         return vector_utils.describe_spiral_line_meaning(left_length, right_length)
+
+    def annotate(self):
+        annotated = self.image.copy()
+
+        left_colour = (0, 255, 255)
+        right_colour = (255, 0, 255)
+
+        # left
+        cv2.line(annotated, self.landmark.rs, self.landmark.le, left_colour, 4)
+        cv2.line(annotated, self.landmark.rs, self.landmark.lh, left_colour, 4)
+        cv2.line(annotated, self.landmark.lk, self.landmark.lh, left_colour, 4)
+        cv2.line(annotated, self.landmark.lk, self.landmark.la, left_colour, 4)
+        # right
+        cv2.line(annotated, self.landmark.ls, self.landmark.re, right_colour, 4)
+        cv2.line(annotated, self.landmark.ls, self.landmark.rh, right_colour, 4)
+        cv2.line(annotated, self.landmark.rk, self.landmark.rh, right_colour, 4)
+        cv2.line(annotated, self.landmark.rk, self.landmark.ra, right_colour, 4)
+
+        return annotated
+
+    def get_result(self):
+        return self.analysis_result
